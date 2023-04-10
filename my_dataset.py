@@ -9,8 +9,8 @@ import pandas as pd
 as_tensor = t.ToTensor()
 
 class APdataset(Dataset):
-    def __init__(self,img_roots:list, type=0,transforms=None, random_seed=233):
-        self.datalist = r'./dataset.csv'
+    def __init__(self,img_roots:list, datalist_dir=r'./dataset.csv', type=0,transforms=None, random_seed=233):
+        self.datalist = datalist_dir
         self.tfms=transforms
         self.img_roots = img_roots
         
