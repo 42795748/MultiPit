@@ -108,7 +108,7 @@ class Pit_Stages(nn.Module):
 
 class MultiPit(nn.Module):
     def __init__(
-            self, img_size, patch_size, stride, base_dims, depth, heads,
+            self, img_size, patch_size, stride, base_dims, depth, heads, branch_dims, branch_depth, branch_heads,
             mlp_ratio, num_parts=8, num_classes=1000, in_chans=3, attn_drop_rate=.0, drop_rate=.0, drop_path_rate=.0):
         super(MultiPit, self).__init__()
 
@@ -147,15 +147,15 @@ class MultiPit(nn.Module):
         '''
         self.backbone = Pit_Stages(base_dims=base_dims, depth=depth, heads=heads,mlp_ratio=mlp_ratio,attn_drop_rate=attn_drop_rate,drop_rate=drop_rate, drop_path_rate= drop_path_rate)
         
-        self.reverse_x = nn.Conv2d(base_dims[-1]*heads[-1],base_dims[0]*heads[0],3,1,1)
-        self.reverse_cls = [ nn.Linear(base_dims[-1]*heads[-1],base_dims[0]*heads[0]) for _ in range(num_parts) ]
+        self.reverse_x = nn.Conv2d(base_dims[-1]*heads[-1],branch_dims[0]*branch_heads[0],3,1,1)
+        self.reverse_cls = [ nn.Linear(base_dims[-1]*heads[-1],branch_dims[0]*branch_heads[0]) for _ in range(num_parts) ]
         self.reverse_cls = nn.ModuleList(self.reverse_cls)
         
-        self.branch_nets = [Pit_Stages(base_dims=base_dims, depth=depth, heads=heads,mlp_ratio=mlp_ratio,attn_drop_rate=attn_drop_rate,drop_rate=drop_rate, drop_path_rate= drop_path_rate) for _ in range(num_parts)]
+        self.branch_nets = [Pit_Stages(base_dims=branch_dims, depth=branch_depth, heads=branch_heads,mlp_ratio=mlp_ratio,attn_drop_rate=attn_drop_rate,drop_rate=drop_rate, drop_path_rate= drop_path_rate) for _ in range(num_parts)]
         self.branch_nets = nn.ModuleList(self.branch_nets)
         
         self.norm = nn.LayerNorm(base_dims[-1] * heads[-1], eps=1e-6)
-        self.num_features = self.embed_dim = base_dims[-1] * heads[-1]
+        self.num_features = self.embed_dim = branch_dims[-1] * branch_heads[-1]
 
         # Classifier head
         self.heads = [ nn.Linear(self.embed_dim, num_classes) for _ in range(num_parts) ]
