@@ -154,7 +154,7 @@ class MultiPit(nn.Module):
         self.branch_nets = [Pit_Stages(base_dims=branch_dims, depth=branch_depth, heads=branch_heads,mlp_ratio=mlp_ratio,attn_drop_rate=attn_drop_rate,drop_rate=drop_rate, drop_path_rate= drop_path_rate) for _ in range(num_parts)]
         self.branch_nets = nn.ModuleList(self.branch_nets)
         
-        self.norm = nn.LayerNorm(base_dims[-1] * heads[-1], eps=1e-6)
+        self.norm = nn.LayerNorm(branch_dims[-1] * branch_heads[-1], eps=1e-6)
         self.num_features = self.embed_dim = branch_dims[-1] * branch_heads[-1]
 
         # Classifier head
